@@ -1,95 +1,115 @@
-module = {};
-transformer = {};
-module.exports = {
-    makeTransformer: function(cfg) {
-        return function(str, state) {
-            return str;
-        };
-    },
-    parameters: {},
-    description: "Identity transformation: makes no changes"
+"use strict";
+
+/* REQUIRES yoob/element-factory.js */
+/* ASSUMES ``transformer`` object has been created */
+
+var compose = function(g, f) {
+    return function(str, data) {
+        str = f(str, data);
+        return g(str, data);
+    };
 };
 
-transformer['identity'] = module.exports;
-module.exports = {
-    makeTransformer: function(cfg) {
-        return function(str, state) {
-            var s = "";
-            for (var i = 0; i < str.length; i++) {
-                var c = cfg.chars.charAt(Math.floor(Math.random() * cfg.chars.length));
-                s += str.charAt(i) + c;
+function LexeductUI() {
+    var container, input, output, processButton, tranformersPanel;
+    var liveMode;
+    var MAX_TRANSFORMER_SLOTS = 8; // TODO dynamic
+    var transformerSlots = [];
+    var transformerNames;
+
+    this.init = function(cfg) {
+        container = cfg.container;
+        input = yoob.makeTextArea(container, 40, 20, cfg.initialText);
+
+        var transformersPanel = yoob.makeDiv(container);
+        transformersPanel.style.border = "2px solid black";
+        transformersPanel.style.display = "inline-block";
+        transformersPanel.style.verticalAlign = "top";
+
+        transformerNames = [["identity", "---"]];
+        for (var key in transformer) {
+            if (key !== 'identity' && transformer.hasOwnProperty(key)) {
+                transformerNames.push([key, key]);
             }
-            return s;
-        };
-    },
-    parameters: {
-        'chars': ["The set of characters to select from", ""]
-    },
-    description: "Insert a randomly-selected character after each character"
-};
+        }
 
-transformer['insert-chars'] = module.exports;
-module.exports = {
-    makeTransformer: function(cfg) {
-        cfg.chance = parseInt(cfg.chance || "100", 10);
-        return function(str, state) {
-            var s = "";
-            for (var i = 0; i < str.length; i++) {
-                var c = str.charAt(i);
-                if (Math.floor(Math.random() * 100) < cfg.chance) {
-                    c = c.toLowerCase();
+        processButton = yoob.makeButton(transformersPanel, "Process", this.process);
+
+        yoob.makeCheckbox(transformersPanel, false, "Live mode", function(b) {
+            liveMode = b;
+        });
+        yoob.makeLineBreak(transformersPanel);
+
+        for (var i = 0; i < MAX_TRANSFORMER_SLOTS; i++) {
+            var slot = this.makeTransformerSlot(transformersPanel, i);
+            transformerSlots.push(slot);
+        }
+
+        output = yoob.makeTextArea(container, 40, 20);
+    };
+
+    this.process = function() {
+        var t = transformer['identity'].makeTransformer({});
+        for (var i = 0; i < transformerSlots.length; i++) {
+            var transformerName = transformerSlots[i].name;
+            var selectedParams = transformerSlots[i].selectedParams;
+            var t2 = transformer[transformerName].makeTransformer(selectedParams);
+            t = compose(t2, t);
+        }
+        var inLines = input.value.split('\n');
+        var outLines = [];
+        for (var i = 0; i < inLines.length; i++) {
+            outLines.push(t(inLines[i]));
+        }
+        output.value = outLines.join('\n');
+    };
+
+    this.updateParametersPanel = function(slot, panel) {
+        var parameters = transformer[slot.name].parameters;
+        panel.innerHTML = "";  // delete any previous controls
+        for (var key in parameters) {
+            if (parameters.hasOwnProperty(key)) {
+                var desc = parameters[key][0];
+                var def = parameters[key][1];
+                var label = yoob.makeSpan(panel, key);
+                var input = yoob.makeTextInput(panel, 24, def);
+                slot.selectedParams[key] = def;
+                input.onchange = function() {
+                    slot.selectedParams[key] = input.value;
+                    if (liveMode) {
+                        process();
+                    }
                 }
-                s += c;
+                yoob.makeLineBreak(panel);
             }
-            return s;
-        };
-    },
-    parameters: {
-        'chance': ["Probability (0-100) of applying to any individual character", "100"]
-    },
-    description: "Convert characters to lowercase"
-};
+        }
+    };
 
-transformer['lower'] = module.exports;
-module.exports = {
-    makeTransformer: function(cfg) {
-        return function(str, state) {
-            var s = "";
-            for (var i = 0; i < str.length; i++) {
-                var c = str.charAt(i);
-                if (cfg.chars.indexOf(c) === -1) {
-                    s += c;
-                }
+    this.makeTransformerSlot = function(container, index) {
+        var select = yoob.makeSelect(
+            container, "Transformer " + (index+1), transformerNames
+        );
+        yoob.makeLineBreak(container);
+        var parametersPanel = yoob.makeDiv(container);
+        parametersPanel.style.padding = "2px";
+        parametersPanel.style.border = "1px solid blue";
+        parametersPanel.style.textAlign = "right";
+
+        var $this = this;
+        select.onchange = function(e) {
+            transformerSlots[index].name = select.options[select.selectedIndex].value;
+            $this.updateParametersPanel(transformerSlots[index], parametersPanel);
+            if (liveMode) {
+                process();
             }
-            return s;
         };
-    },
-    parameters: {
-        'chars': ["The set of characters to remove", ""]
-    },
-    description: "Remove all occurrences of the specified characters"
-};
 
-transformer['remove-chars'] = module.exports;
-module.exports = {
-    makeTransformer: function(cfg) {
-        cfg.chance = parseInt(cfg.chance || "100", 10);
-        return function(str, state) {
-            var s = "";
-            for (var i = 0; i < str.length; i++) {
-                var c = str.charAt(i);
-                if (Math.floor(Math.random() * 100) < cfg.chance) {
-                    c = c.toUpperCase();
-                }
-                s += c;
-            }
-            return s;
+        return {
+            name: 'identity',
+            selectedParams: {},
+            select: select,
+            parametersPanel: parametersPanel
         };
-    },
-    parameters: {
-        'chance': ["Probability (0-100) of applying to any individual character", "100"]
-    },
-    description: "Convert characters to uppercase"
-};
+    };
 
-transformer['upper'] = module.exports;
+};
