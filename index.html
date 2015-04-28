@@ -13,7 +13,6 @@
     <section class="page-header">
       <h1 class="project-name">Lexeduct</h1>
       <h2 class="project-tagline">Experimental framework for text-processing pipelines in JS (node or browser)</h2>
-      <a href="in-browser/" class="btn">Try it Online!</a>
       <a href="https://github.com/catseye/Lexeduct" class="btn">View on GitHub</a>
       <a href="https://github.com/catseye/Lexeduct/zipball/master" class="btn">Download .zip</a>
       <a href="https://github.com/catseye/Lexeduct/tarball/master" class="btn">Download .tar.gz</a>
@@ -23,14 +22,20 @@
       <h1>
 <a id="lexeduct" class="anchor" href="#lexeduct" aria-hidden="true"><span class="octicon octicon-link"></span></a>Lexeduct</h1>
 
-<p><strong>Lexeduct</strong> is an experimental framework for text-processing pipelines, written
-in Javascript, usable in both node and in the browser (knock on wood.)</p>
+<blockquote>
+<p>"this is not a wheel I've re-invented before"</p>
+</blockquote>
 
-<p>It is currently at a <em>what is this I don't even</em> stage of development.  The
-framework and usage and everything is subject to change without notice.</p>
+<p><strong>Lexeduct</strong> is an experimental framework for text-processing pipelines,
+written in Javascript, usable both on the console under <a href="https://nodejs.org/">Node.js</a>, and
+in a web browser.</p>
+
+<p>It is currently a work in progress.  The framework and usage and everything
+is subject to change without notice.  The version number is nominally 0.1-PRE;
+there is not yet a released version.</p>
 
 <p>Being a framework, Lexeduct inevitably handles some use cases well, and other
-use cases poorly.  Don't expect too much from it.  More details here soon.</p>
+use cases poorly.  See the "Limitations" section below for more details.</p>
 
 <p>The name "Lexeduct" is in analogy with "aqueduct": conduits for words intead
 of water.</p>
@@ -40,8 +45,12 @@ of water.</p>
 
 <p>The main tool is <code>lexeduct.js</code>.  You can <code>cd</code> into the <code>src</code> directory and run
 it as <code>./lexeduct.js</code>, or you can put the <code>src</code> directory on your executable
-search path (e.g. <code>export PATH=$PATH:/path/to/lexeduct/src</code>) and run it as
-<code>lexeduct.js</code> from anywhere on your system.  (YMMV on Windows.)</p>
+search path, for example like</p>
+
+<pre><code>export PATH=$PATH:/path/to/lexeduct/src
+</code></pre>
+
+<p>and run it as <code>lexeduct.js</code> from anywhere on your system.  (YMMV on Windows.)</p>
 
 <p>The basic usage is</p>
 
@@ -55,7 +64,7 @@ HELLO
 </code></pre>
 
 <p>Parameters can be given with the syntax <code>name=value</code> before the name of the
-transformer they are to be applied to.  So, for example,</p>
+transformer they are to be applied to:</p>
 
 <pre><code>$ echo 'Hello' | lexeduct.js chars=e remove-chars
 Hllo
@@ -63,23 +72,23 @@ Hllo
 
 <p>You can of course use shell pipelines to compose transformers:</p>
 
-<pre><code>$ echo 'Hello!' | lexeduct.js upper | lexeduct.js 'chars= ' insert-chars
+<pre><code>$ echo 'Hello!' | lexeduct.js upper | lexeduct.js chars=' ' insert-chars
 H E L L O !
 </code></pre>
 
 <p><em>Or</em> you can name multiple transformers on <code>lexeduct.js</code>'s command line to
 compose them:</p>
 
-<pre><code>$ echo 'Hello!' | lexeduct.js upper 'chars= ' insert-chars
+<pre><code>$ echo 'Hello!' | lexeduct.js upper chars=' ' insert-chars
 H E L L O !
 </code></pre>
 
 <p>Multiple transformers are applied left-to-right.</p>
 
-<pre><code>$ echo 'Hello!' | lexeduct.js 'chars=a' insert-chars upper
+<pre><code>$ echo 'Hello!' | lexeduct.js chars=a insert-chars upper
 HAEALALAOA!A
 
-$ echo 'Hello!' | lexeduct.js upper 'chars=a' insert-chars
+$ echo 'Hello!' | lexeduct.js upper chars=a insert-chars
 HaEaLaLaOa!a
 </code></pre>
 
@@ -98,20 +107,13 @@ transformer function takes two arguments: the current string to process, and
 transformer function should return either a string, or null (not yet supported),
 or an array of strings (not yet supported.)</p>
 
-<p>As a simple example, here is the source of the <code>upper</code> transformer, found
-in <code>src/transformers/upper.js</code>:</p>
+<p>The module may also export a couple of other things, like an English description
+of the transformer, and the possible configuration options.  For a reasonably
+simple example, see the source of the <code>upper</code> transformer, found
+in <a href="src/transformers/upper.js">src/transformers/upper.js</a>.</p>
 
-<pre><code>module.exports = {
-    makeTransformer: function(cfg) {
-        return function(str, state) {
-            return str.toUpperCase();
-        };
-    }
-};
-</code></pre>
-
-<p><code>state</code> is an object whose members may be read or written to store ancillary
-state.  (Doing so will make it an 'impure' pipeline.)</p>
+<p>State deposited into the state object is shared by all transformers, so it's
+a good idea to choose a key that you think will probably be unique.</p>
 
 <h2>
 <a id="in-browser-version" class="anchor" href="#in-browser-version" aria-hidden="true"><span class="octicon octicon-link"></span></a>In-Browser Version</h2>
@@ -120,7 +122,7 @@ state.  (Doing so will make it an 'impure' pipeline.)</p>
 a Javascript file which contains all the available transformers in a format
 suitable for loading in an HTML document.</p>
 
-<p>Open <code>demo/lexeduct.html</code> in your browser.  It provides a UI for composing
+<p>Then open <code>demo/lexeduct.html</code> in your browser.  It provides a UI for composing
 these transformers and applying them to text provided in a textarea.</p>
 
 <h2>
@@ -128,27 +130,8 @@ these transformers and applying them to text provided in a textarea.</p>
 
 <p>Lexeduct was partly inspired by, and is partly a product of parallel evolution
 resembling, <a href="https://github.com/MichaelPaulukonis/">Michael Paulukonis</a>'s <a href="https://github.com/MichaelPaulukonis/text-munger">TextMunger</a>.  It is also indebted to
-various and sundry discussion with him and others on the
-<a href="https://groups.google.com/forum/#!forum/generativetext">GenerativeText Forum</a>.</p>
-
-<h2>
-<a id="todo" class="anchor" href="#todo" aria-hidden="true"><span class="octicon octicon-link"></span></a>TODO</h2>
-
-<ul>
-<li>  Allow filters to do something at the very end, maybe.</li>
-<li>  Allow filters return multiple, or no, strings.</li>
-<li>  Many, many other things.</li>
-</ul>
-
-<h3>
-<a id="in-browser-ui" class="anchor" href="#in-browser-ui" aria-hidden="true"><span class="octicon octicon-link"></span></a>In-browser UI</h3>
-
-<ul>
-<li>  Dynamically allocate the number of transformer-slots.</li>
-<li>  Provide "insert" and "delete" operations on each transformer-slot.</li>
-<li>  Display the description for each select transformer, in a tooltip(?)</li>
-<li>  Create prompts for available params dynamically in each transformer-slot.</li>
-</ul>
+various and sundry discussion with him, and others on the
+<a href="https://groups.google.com/forum/#!forum/generativetext">GenerativeText Forum</a>, particularly <a href="https://github.com/enkiv2/">John Ohno</a>.</p>
 
       <footer class="site-footer">
         <span class="site-footer-owner"><a href="https://github.com/catseye/Lexeduct">Lexeduct</a> is maintained by <a href="https://github.com/catseye">catseye</a>.</span>
