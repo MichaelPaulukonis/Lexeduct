@@ -109,6 +109,43 @@ module.exports = {
 transformer['repeat-chars'] = module.exports;
 module.exports = {
     makeTransformer: function(cfg) {
+        return function(str, state) {
+            var s = "";
+            var len = str.length;
+            for (var i = 0; i < len; i++) {
+                var index = Math.floor(Math.random() * str.length);
+                s += str.charAt(index);
+                str = str.slice(0, index) + str.slice(index + 1, str.length);
+            }
+            return s;
+        };
+    },
+    parameters: {},
+    description: "Randomly re-order all characters found"
+};
+
+transformer['shuffle-chars'] = module.exports;
+module.exports = {
+    makeTransformer: function(cfg) {
+        return function(str, state) {
+            var words = str.split(/\s+/);
+            var acc = [];
+            var len = words.length;
+            for (var i = 0; i < len; i++) {
+                var index = Math.floor(Math.random() * words.length);
+                acc.push(words[index]);
+                words = words.slice(0, index).concat(words.slice(index + 1, words.length));
+            }
+            return acc.join(' ');
+        };
+    },
+    parameters: {},
+    description: "Randomly re-order all words found"
+};
+
+transformer['shuffle-words'] = module.exports;
+module.exports = {
+    makeTransformer: function(cfg) {
         cfg.chance = parseInt(cfg.chance || "100", 10);
         return function(str, state) {
             var s = "";
