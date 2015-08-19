@@ -1,3 +1,4 @@
+
 module = {};
 transformer = {};
 module.exports = {
@@ -194,3 +195,21 @@ module.exports = {
 };
 
 transformer['upper'] = module.exports;
+
+
+transformer['markov'] = {
+    makeTransformer: function(cfg) {
+        cfg.order = parseInt(cfg.order || 2, 10);
+        cfg.count = parseInt(cfg.count || 200, 10);
+        return function(str, state) {
+            var m = new Markov(cfg.order);
+            m.init(str);
+            return m.generate(cfg.count);
+        };
+    },
+    parameters: {
+        'count':['number of words to output', 50],
+        'order': ['order', 2]
+    },
+    description: 'ngrams in theory and practice'
+};
