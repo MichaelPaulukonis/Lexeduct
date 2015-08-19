@@ -213,3 +213,22 @@ transformer['markov'] = {
     },
     description: 'ngrams in theory and practice'
 };
+
+
+transformer['shortlines'] = {
+    makeTransformer: function(cfg) {
+        cfg.newline = parseFloat(cfg.newline || 0.2, 10);
+        cfg.multiple = parseFloat(cfg.multiple || 0.3, 10);
+        cfg.multipleRange = parseInt(cfg.multipleRante || 3, 10);
+        return function(str, state) {
+            var sl = new Shortlines(cfg);
+            return sl.generate(str);
+        };
+},
+    parameters: {
+        'newline': ['probability of newline 0.0...1', 0.2],
+        'multiple': ['probability of multiple newlines 0.0..1', 0.3],
+        'multipleRange': ['max number of newlines', 3]
+        },
+    description: 'breaks text into short lines'
+};
