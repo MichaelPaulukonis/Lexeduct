@@ -72,12 +72,11 @@ function LexeductUI() {
             var t2 = transformer[transformerName].makeTransformer(selectedParams);
             t = compose(t2, t);
         }
-        var inLines = input.value.split('\n');
-        var outLines = [];
-        for (var i = 0; i < inLines.length; i++) {
-            outLines.push(t(inLines[i]));
-        }
-        output.value = outLines.join('\n');
+
+        // process the entire blob of text, not line-by-line
+        // this gives the transformer a larger context
+        output.value = t(input.value);
+
     };
 
     this.updateParametersPanel = function(slot, panel) {
