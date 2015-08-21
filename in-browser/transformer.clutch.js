@@ -92,9 +92,6 @@ var Shortlines = function(cfg) {
             }
         }
 
-        // this mean every line-break
-        // IS ALWAYS FOLLOWED BY A SPACE
-        // we do not like this
         return out.join('');
     };
 

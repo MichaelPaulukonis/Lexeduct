@@ -10,6 +10,20 @@ var compose = function(g, f) {
     };
 };
 
+var enabler = function(e, panel, slot) {
+
+    if (panel.classList.contains('disabled')) {
+        panel.classList.remove('disabled');
+        slot.enabled = true;
+    } else {
+        panel.classList.add('disabled');
+        slot.enabled = false;
+    }
+
+    // TODO: re-trigger processing (if live-mode)
+};
+
+
 function LexeductUI() {
     var container, input, output, processButton, tranformersPanel;
     var MAX_TRANSFORMER_SLOTS = 8; // TODO dynamic
@@ -61,19 +75,23 @@ function LexeductUI() {
 
     this.setLiveMode = function(b) {
         this.liveMode = b;
-        // processButton.disabled = b;
+    };
+
+    var slotEnabled = function(slot) {
+
+        var enabled = true;
+
+        enabled = (slot.name !== 'identity' && slot.enabled);
+
+        return enabled;
     };
 
     this.process = function() {
         var t = transformer['identity'].makeTransformer({});
         for (var i = 0; i < transformerSlots.length; i++) {
-            // if selected transformer is "disabled"
-            // skip it
-            // TODO: build the css and javascript for double-click switching
+            // if selected transformer is "disabled" skip it
             var transformerName = transformerSlots[i].name;
-            if (transformerName === "identity" ) {
-                continue;
-            }
+            if (!slotEnabled(transformerSlots[i])) continue;
             var selectedParams = transformerSlots[i].selectedParams;
             var t2 = transformer[transformerName].makeTransformer(selectedParams);
             t = compose(t2, t);
@@ -95,12 +113,19 @@ function LexeductUI() {
                 this.makeParameterEditor(slot, panel, paramName, desc, def);
             }
         }
+        panel.parentElement.addEventListener('dblclick', function(e) { enabler(e, panel.parentElement, slot); }, false);
     };
 
+
     this.makeParameterEditor = function(slot, panel, paramName, desc, def) {
+        // TODO: this is being added once FOR EACH PARAMETER
+        // it should be added with "makeTransformerSlot"
+        // but the slot itself does not exist at that point....
+        // panel.parentElement.addEventListener('dblclick', function(e) { enabler(e, panel.parentElement, slot); }, false);
         var label = yoob.makeSpan(panel, paramName);
         var paramInput = yoob.makeTextInput(panel, 24, def);
         slot.selectedParams[paramName] = def;
+        slot.enabled = true;
         var $this = this;
         paramInput.oninput = function() {
             slot.selectedParams[paramName] = paramInput.value;
@@ -116,6 +141,7 @@ function LexeductUI() {
         slotPanel.style.padding = "2px";
         slotPanel.style.margin = "2px";
         slotPanel.style.border = "1px solid black";
+        slotPanel.className = "transformer";
         var select = yoob.makeSelect(
             slotPanel, "Transformer " + (index+1), transformerNames
         );

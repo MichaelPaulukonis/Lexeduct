@@ -1,18 +1,16 @@
-
-module = {};
 transformer = {};
-module.exports = {
+transformer['identity'] = {
     makeTransformer: function(cfg) {
         return function(str, state) {
             return str;
         };
     },
     parameters: {},
-    description: "Identity transformation: makes no changes"
+    description: "Identity transformation: makes no changes",
+    enabled: true
 };
 
-transformer['identity'] = module.exports;
-module.exports = {
+transformer['insert-chars'] = {
     makeTransformer: function(cfg) {
         cfg.chance = parseInt(cfg.chance || "100", 10);
         return function(str, state) {
@@ -35,8 +33,8 @@ module.exports = {
     description: "Insert a randomly-selected character after each character"
 };
 
-transformer['insert-chars'] = module.exports;
-module.exports = {
+
+transformer['lower'] = {
     makeTransformer: function(cfg) {
         cfg.chance = parseInt(cfg.chance || "100", 10);
         return function(str, state) {
@@ -57,8 +55,8 @@ module.exports = {
     description: "Convert characters to lowercase"
 };
 
-transformer['lower'] = module.exports;
-module.exports = {
+
+transformer['remove-chars'] = {
     makeTransformer: function(cfg) {
         cfg.chance = parseInt(cfg.chance || "100", 10);
         return function(str, state) {
@@ -81,8 +79,8 @@ module.exports = {
     description: "Remove occurrences of the specified characters"
 };
 
-transformer['remove-chars'] = module.exports;
-module.exports = {
+
+transformer['repeat-chars'] = {
     makeTransformer: function(cfg) {
         cfg.count = parseInt(cfg.count || "1", 10);
         cfg.chance = parseInt(cfg.chance || "100", 10);
@@ -107,8 +105,8 @@ module.exports = {
     description: "Insert extra copies of the character after each character"
 };
 
-transformer['repeat-chars'] = module.exports;
-module.exports = {
+
+transformer['replace-chars'] = {
     makeTransformer: function(cfg) {
         cfg.chance = parseInt(cfg.chance || "100", 10);
         return function(str, state) {
@@ -135,8 +133,8 @@ module.exports = {
     description: "Replace occurrences of the specified characters"
 };
 
-transformer['replace-chars'] = module.exports;
-module.exports = {
+
+transformer['shuffle-chars'] = {
     makeTransformer: function(cfg) {
         return function(str, state) {
             var s = "";
@@ -153,8 +151,10 @@ module.exports = {
     description: "Randomly re-order all characters found"
 };
 
-transformer['shuffle-chars'] = module.exports;
-module.exports = {
+// TODO: non-local shuffle
+// when processing as large-blob, the results are... incoherent
+// use a "vicinity" property?
+transformer['shuffle-words'] = {
     makeTransformer: function(cfg) {
         return function(str, state) {
             var words = str.split(/\s+/);
@@ -172,10 +172,10 @@ module.exports = {
     description: "Randomly re-order all words found"
 };
 
-transformer['shuffle-words'] = module.exports;
-module.exports = {
+
+transformer['upper'] = {
     makeTransformer: function(cfg) {
-        cfg.chance = parseInt(cfg.chance || "100", 10);
+        cfg.chance = parseInt(cfg.chance || 100, 10);
         return function(str, state) {
             var s = "";
             for (var i = 0; i < str.length; i++) {
@@ -193,8 +193,6 @@ module.exports = {
     },
     description: "Convert characters to uppercase"
 };
-
-transformer['upper'] = module.exports;
 
 
 transformer['markov'] = {
