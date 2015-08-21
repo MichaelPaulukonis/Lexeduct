@@ -232,3 +232,37 @@ transformer['shortlines'] = {
         },
     description: 'breaks text into short lines'
 };
+
+transformer['Initial Spaces'] = {
+    makeTransformer: function(cfg) {
+        cfg.offset = parseInt(cfg.offset || 20, 10);
+        cfg.offsetVariance = parseInt(cfg.offsetVariance || 20, 10);
+        cfg.offsetProbability = parseFloat(cfg.offsetVarianceRante || 0.8, 10);
+        return function(str, state) {
+            var is = new InitialSpaces(cfg);
+            return is.generate(str);
+        };
+},
+    parameters: {
+        'offset': ['max offset', 20],
+        'offsetVariance': ['variance in offsets', 20],
+        'offsetProbability': ['probability of an offset 0.0..1.0', 0.8]
+        },
+    description: 'adds semi-random spaces at beginning of lines'
+};
+
+transformer['Truncater'] = {
+    makeTransformer: function(cfg) {
+        cfg.max = parseInt(cfg.max || 20, 10);
+        cfg.probability = parseFloat(cfg.probability || 0.2, 10);
+        return function(str, state) {
+            var t = new Truncater(cfg);
+            return t.generate(str);
+        };
+},
+    parameters: {
+        'max': ['variance in offsets', 20],
+        'probability': ['probability of an offset 0.0..1.0', 0.2]
+        },
+    description: 'chops random chars from beginning of lines'
+};

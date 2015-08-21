@@ -61,7 +61,7 @@ function LexeductUI() {
 
     this.setLiveMode = function(b) {
         this.liveMode = b;
-        processButton.disabled = b;
+        // processButton.disabled = b;
     };
 
     this.process = function() {
