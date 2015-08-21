@@ -67,7 +67,13 @@ function LexeductUI() {
     this.process = function() {
         var t = transformer['identity'].makeTransformer({});
         for (var i = 0; i < transformerSlots.length; i++) {
+            // if selected transformer is "disabled"
+            // skip it
+            // TODO: build the css and javascript for double-click switching
             var transformerName = transformerSlots[i].name;
+            if (transformerName === "identity" ) {
+                continue;
+            }
             var selectedParams = transformerSlots[i].selectedParams;
             var t2 = transformer[transformerName].makeTransformer(selectedParams);
             t = compose(t2, t);

@@ -76,9 +76,9 @@ var Shortlines = function(cfg) {
 
         var out = [];
         var words = text.split(/\s+/);
-
+        var line = [];
         for (var word in words) {
-            out.push(words[word]);
+            line.push(words[word]);
 
             if (coinflip(this.config.newline)) {
                 // start at 2, since when you join a 1-length array, you don't get the join-character.
@@ -86,15 +86,16 @@ var Shortlines = function(cfg) {
                 if (coinflip(this.config.multiple)) {
                     lines += random(this.config.multipleRange);
                 }
-                out.push(Array(lines).join('\n'));
+                line.push(Array(lines).join('\n'));
+                out.push(line.join(' '));
+                line = [];
             }
         }
 
         // this mean every line-break
         // IS ALWAYS FOLLOWED BY A SPACE
         // we do not like this
-        return out.join(' ');
-
+        return out.join('');
     };
 
 };

@@ -208,7 +208,7 @@ transformer['markov'] = {
         };
     },
     parameters: {
-        'count':['number of words to output', 50],
+        'count':['number of words to output', 200],
         'order': ['order', 2]
     },
     description: 'ngrams in theory and practice'
