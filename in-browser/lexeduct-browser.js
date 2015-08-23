@@ -3,6 +3,8 @@
 /* REQUIRES yoob/element-factory.js */
 /* ASSUMES ``transformer`` object has been created */
 
+var outputDivs = false;
+
 var compose = function(g, f) {
     return function(str, data) {
         str = f(str, data);
@@ -10,18 +12,7 @@ var compose = function(g, f) {
     };
 };
 
-var enabler = function(e, panel, slot) {
 
-    if (panel.classList.contains('disabled')) {
-        panel.classList.remove('disabled');
-        slot.enabled = true;
-    } else {
-        panel.classList.add('disabled');
-        slot.enabled = false;
-    }
-
-    // TODO: re-trigger processing (if live-mode)
-};
 
 
 function LexeductUI() {
@@ -68,7 +59,16 @@ function LexeductUI() {
             transformerSlots.push(slot);
         }
 
-        output = yoob.makeTextArea(container, 40, 20);
+
+        // if we do a div, instead of a TextArea
+        // initial whitespace doesn't render.
+        // POOP
+        if (outputDivs) {
+            output = yoob.makeDiv(container);
+            output.id = "output";
+        } else {
+            output = yoob.makeTextArea(container, 40, 20);
+        }
 
         this.setLiveMode(cfg.liveMode);
     };
@@ -99,8 +99,25 @@ function LexeductUI() {
 
         // process the entire blob of text, not line-by-line
         // this gives the transformer a larger context
-        output.value = t(input.value);
+        if (outputDivs) {
+            output.textContent = t(input.value);
+        } else {
+            output.value = t(input.value);
+        }
 
+    };
+
+    this.enabler = function(e, panel, slot, $this) {
+
+        if (panel.classList.contains('disabled')) {
+            panel.classList.remove('disabled');
+            slot.enabled = true;
+        } else {
+            panel.classList.add('disabled');
+            slot.enabled = false;
+        }
+
+        $this.process();
     };
 
     this.updateParametersPanel = function(slot, panel) {
@@ -113,15 +130,13 @@ function LexeductUI() {
                 this.makeParameterEditor(slot, panel, paramName, desc, def);
             }
         }
-        panel.parentElement.addEventListener('dblclick', function(e) { enabler(e, panel.parentElement, slot); }, false);
+
+        var $this = this;
+        panel.parentElement.addEventListener('dblclick', function(e) { $this.enabler(e, panel.parentElement, slot, $this); }, false);
     };
 
 
     this.makeParameterEditor = function(slot, panel, paramName, desc, def) {
-        // TODO: this is being added once FOR EACH PARAMETER
-        // it should be added with "makeTransformerSlot"
-        // but the slot itself does not exist at that point....
-        // panel.parentElement.addEventListener('dblclick', function(e) { enabler(e, panel.parentElement, slot); }, false);
         var label = yoob.makeSpan(panel, paramName);
         var paramInput = yoob.makeTextInput(panel, 24, def);
         slot.selectedParams[paramName] = def;

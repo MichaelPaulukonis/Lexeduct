@@ -247,3 +247,10 @@ a {
 .disabled {
     background-color: blue;
 }
+
+#output {
+    display: inline-block;
+    vertical-align: top;
+    width: 328px;
+    text-align: left;
+}
