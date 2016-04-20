@@ -1,7 +1,11 @@
+My work is on-going in the gh-pages branch.
+
+
+
 Lexeduct
 ========
 
-**You can try Lexeduct live in your web browser here: [Lexeduct Online][]**
+**You can try Lexeduct live in your web browser here: [Lexeduct Online](http://michaelpaulukonis.github.io/Lexeduct/in-browser/)**
 
 > "this is not a wheel I've re-invented before"
 
