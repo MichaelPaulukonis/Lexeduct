@@ -15,5 +15,5 @@ for (var i = 0; i < files.length; i++) {
     var transformerName = filename.split('.js')[0];
     var text = fs.readFileSync(dirname + '/' + filename);
     write(text);
-    write("transformer['" + transformerName + "'] = module.exports;");
+    write(`transformer["${transformerName}"] = module.exports;\n\n`);
 }
